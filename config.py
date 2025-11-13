@@ -7,7 +7,9 @@ load_dotenv()
 DB_CONFIG = {
     "user": os.getenv("DB_USER"),
     "password": os.getenv("DB_PASSWORD"),
-    "dsn": os.getenv("DB_DSN")
+    "host": os.getenv("DB_HOST"),
+    "port": int(os.getenv("DB_PORT", "1522")), # Default to 1522 if not set
+    "service_name": os.getenv("DB_SERVICE_NAME")
 }
 
 # OCI Configuration

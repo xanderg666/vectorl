@@ -1,21 +1,47 @@
 import oracledb
 import pandas as pd
 import array
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 from contextlib import contextmanager
 import logging
 
+# Configurar logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 class OracleADBConnection:
     """Clase para manejar conexiones a Oracle Autonomous Database"""
-
-    def __init__(self, user: str, password: str, dsn: str = None):
+    
+    def __init__(self, user: str, password: str, 
+                 host: Optional[str] = None, port: Optional[int] = None, 
+                 service_name: Optional[str] = None, dsn: Optional[str] = None):
+        """
+        Inicializar conexión a Oracle ADB
+        
+        Args:
+            user: Usuario de la base de datos
+            password: Contraseña
+            host: Host de la ADB (ej: adb.us-chicago-1.oraclecloud.com)
+            port: Puerto (normalmente 1522)
+            service_name: Nombre del servicio (ej: g1cde62092a80c9_vectorjg_low.adb.oraclecloud.com)
+            dsn: Cadena de conexión completa (si se proporciona, host/port/service_name son ignorados)
+        """
         self.user = user
         self.password = password
-        self.dsn = dsn
+        
+        if dsn:
+            self.dsn = dsn
+        elif host and port and service_name:
+            # Connection string simple que funciona sin wallet
+            self.dsn = f'''(description= 
+                (retry_count=20)
+                (retry_delay=3)
+                (address=(protocol=tcps)(port={port})(host={host}))
+                (connect_data=(service_name={service_name})))'''
+        else:
+            raise ValueError("Debe proporcionar 'dsn' o ('host', 'port', 'service_name').")
+        
         self.connection = None
 
     def connect(self):
