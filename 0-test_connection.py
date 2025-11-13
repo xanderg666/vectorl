@@ -8,21 +8,26 @@ logger = logging.getLogger(__name__)
 
 
 def test_db_connection():
-    """Prueba la conexión a la base de datos Oracle ADB usando una wallet."""
-    logger.info("Iniciando prueba de conexión a la base de datos con wallet...")
+    """Prueba la conexión a la base de datos Oracle ADB usando DSN."""
+    logger.info("Iniciando prueba de conexión a la base de datos con DSN...")
 
-    if not os.path.isdir(DB_CONFIG["config_dir"]):
-        wallet_path = os.path.abspath(DB_CONFIG['config_dir'])
-        logger.error(f"El directorio de la wallet '{wallet_path}' no fue encontrado.")
-        logger.error("Asegúrate de que la wallet está en el lugar correcto.")
+    # Validar que la configuración esencial está presente
+    if not all([DB_CONFIG.get("user"), DB_CONFIG.get("password"), DB_CONFIG.get("dsn")]):
+        logger.error("La configuración de la base de datos (user, password, dsn) está incompleta.")
+        logger.error("Asegúrate de que las variables de entorno DB_USER, DB_PASSWORD y DB_DSN están definidas.")
         return
 
     try:
-        db = OracleADBConnection(**DB_CONFIG)
+        # La clase OracleADBConnection ya está preparada para usar DSN
+        db = OracleADBConnection(
+            user=DB_CONFIG["user"],
+            password=DB_CONFIG["password"],
+            dsn=DB_CONFIG["dsn"]
+        )
 
         logger.info("Intentando establecer conexión...")
         with db.get_connection() as conn:
-            logger.info(f"¡Conexión exitosa!")
+            logger.info("¡Conexión exitosa!")
             logger.info(f"Versión de Oracle DB: {conn.version}")
 
         logger.info("La prueba de conexión ha finalizado exitosamente.")
@@ -30,9 +35,9 @@ def test_db_connection():
     except Exception as e:
         logger.error(f"Ocurrió un error durante la prueba de conexión: {e}")
         logger.error("Por favor, verifica los siguientes puntos:")
-        logger.error("1. Que las credenciales (usuario/contraseña) son correctas.")
-        logger.error("2. Que el DSN es correcto.")
-        logger.error("3. Que el contenido del directorio de la wallet es válido.")
+        logger.error("1. Que las credenciales (DB_USER, DB_PASSWORD) son correctas.")
+        logger.error("2. Que la cadena de conexión (DB_DSN) es correcta y accesible.")
+        logger.error("3. Que no hay firewalls o grupos de seguridad de red bloqueando la conexión al puerto 1522.")
 
 
 if __name__ == "__main__":

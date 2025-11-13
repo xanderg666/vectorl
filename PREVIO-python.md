@@ -25,4 +25,14 @@ conda activate vector
 
 instalar requerimientos
 
+- git 
+
+``sudo dnf install git -y``
+
+
+
+- requerimientos 
+
+`cd vectorl`
+
 `pip install -r requirements.txt`
