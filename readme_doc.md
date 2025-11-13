@@ -90,6 +90,11 @@ python 0-test_connection.py
 
 ### 2. Crear tabla vectorial
 
+1- crear el usuario
+
+
+
+
 ```bash
 python 1-create_vector_table.py
 ```
