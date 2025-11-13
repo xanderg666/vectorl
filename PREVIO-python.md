@@ -39,7 +39,7 @@ sudo firewall-cmd --reload
 ```
 
 ```
-
+git clone https://github.com/xanderg666/vectorl.git
 ```
 
 - requerimientos 
