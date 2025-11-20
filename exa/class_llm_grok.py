@@ -1,4 +1,5 @@
 import oci
+from oci.auth.signers import InstancePrincipalsSecurityTokenSigner
 from typing import List, Dict, Any, Optional
 import logging
 
@@ -10,7 +11,7 @@ class GrokOCIAssistant:
     """Clase para usar modelos Grok de OCI con búsqueda vectorial"""
 
     def __init__(self, config_file=None, profile=None,
-                 compartment_id=None, endpoint=None):
+                 compartment_id=None, endpoint=None, use_instance_principal=False):
         """Inicializar cliente Grok OCI"""
         # Importar config solo si no se proveen parámetros
         if config_file is None or compartment_id is None or endpoint is None:
@@ -19,15 +20,30 @@ class GrokOCIAssistant:
             profile = profile or OCI_CONFIG["profile"]
             compartment_id = compartment_id or OCI_CONFIG["compartment_id"]
             endpoint = endpoint or OCI_CONFIG["endpoint"]
+            use_instance_principal = use_instance_principal or OCI_CONFIG.get("use_instance_principal", False)
 
-        self.config = oci.config.from_file(config_file, profile)
-        self.client = oci.generative_ai_inference.GenerativeAiInferenceClient(
-            config=self.config,
-            service_endpoint=endpoint,
-            retry_strategy=oci.retry.NoneRetryStrategy(),
-            timeout=(15, 300)
-        )
         self.compartment_id = compartment_id
+        
+        # Configurar autenticación
+        if use_instance_principal:
+            # Usar Instance Principal
+            signer = InstancePrincipalsSecurityTokenSigner()
+            self.client = oci.generative_ai_inference.GenerativeAiInferenceClient(
+                config={'region': 'us-chicago-1'},  # Ajustar región según necesidad
+                signer=signer,
+                service_endpoint=endpoint,
+                retry_strategy=oci.retry.NoneRetryStrategy(),
+                timeout=(15, 300)
+            )
+        else:
+            # Usar archivo de configuración tradicional
+            self.config = oci.config.from_file(config_file, profile)
+            self.client = oci.generative_ai_inference.GenerativeAiInferenceClient(
+                config=self.config,
+                service_endpoint=endpoint,
+                retry_strategy=oci.retry.NoneRetryStrategy(),
+                timeout=(15, 300)
+            )
 
         self.models = {
             "grok-3": "ocid1.generativeaimodel.oc1.us-chicago-1.amaaaaaask7dceya6dvgvvj3ovy4lerdl6fvx525x3yweacnrgn4ryfwwcoq",
@@ -96,7 +112,7 @@ class GrokOCIAssistant:
                             model_name: str = "grok-3-mini",
                             custom_system_prompt: Optional[str] = None) -> Dict[str, Any]:
         """
-        Responder pregunta usando resultados de búsqueda vectorial como contexto
+        Responder pregunta usando resultados de bÃºsqueda vectorial como contexto
 
         Args:
             query: Pregunta del usuario
@@ -133,17 +149,17 @@ class GrokOCIAssistant:
 
             # System prompt
             if not custom_system_prompt:
-                custom_system_prompt = """Eres un asistente experto que responde preguntas basándose en documentación proporcionada.
+                custom_system_prompt = """Eres un asistente experto que responde preguntas basÃ¡ndose en documentaciÃ³n proporcionada.
 
 INSTRUCCIONES:
-1. Usa SOLO la información de los documentos proporcionados
-2. Si la información no está en los documentos, indícalo claramente
+1. Usa SOLO la informaciÃ³n de los documentos proporcionados
+2. Si la informaciÃ³n no estÃ¡ en los documentos, indÃ­calo claramente
 3. Cita los documentos relevantes cuando sea apropiado
 4. Proporciona respuestas estructuradas y completas
-5. Si encuentras información contradictoria, menciónalo"""
+5. Si encuentras informaciÃ³n contradictoria, menciÃ³nalo"""
 
             # Prompt completo
-            prompt = f"""Basándote en los siguientes documentos, responde la pregunta del usuario.
+            prompt = f"""BasÃ¡ndote en los siguientes documentos, responde la pregunta del usuario.
 
 DOCUMENTOS RELEVANTES:
 {context}
@@ -160,7 +176,7 @@ RESPUESTA:"""
                 system_prompt=custom_system_prompt
             )
 
-            # Extraer títulos para metadata
+            # Extraer tÃ­tulos para metadata
             doc_titles = []
             for r in search_results:
                 title = r.get('title', r.get('docid', r.get('nombre_archivo', 'Unknown')))
@@ -180,7 +196,7 @@ RESPUESTA:"""
 
     def structured_answer(self, query: str, search_results: List[Dict[str, Any]],
                           model_name: str = "grok-3-mini") -> Dict[str, Any]:
-        """Generar respuesta estructurada con secciones específicas"""
+        """Generar respuesta estructurada con secciones especÃ­ficas"""
         system_prompt = """Eres un asistente experto que proporciona respuestas estructuradas.
 
 Estructura tu respuesta en las siguientes secciones:
@@ -189,7 +205,7 @@ Estructura tu respuesta en las siguientes secciones:
 [Respuesta concisa en 2-3 oraciones]
 
 ## DETALLES
-[Información detallada y relevante]
+[InformaciÃ³n detallada y relevante]
 
 ## PUNTOS CLAVE
 - [Punto importante 1]
