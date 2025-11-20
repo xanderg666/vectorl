@@ -40,18 +40,15 @@ def setup_database_table():
 
     try:
         # Validar que la configuración esencial está presente
-        if not all([DB_CONFIG.get("user"), DB_CONFIG.get("password"), 
-                    DB_CONFIG.get("host"), DB_CONFIG.get("port"), DB_CONFIG.get("service_name")]):
-            logger.error("La configuración de la base de datos (user, password, host, port, service_name) está incompleta.")
-            logger.error("Asegúrate de que las variables de entorno DB_USER, DB_PASSWORD, DB_HOST, DB_PORT y DB_SERVICE_NAME están definidas.")
+        if not all([DB_CONFIG.get("user"), DB_CONFIG.get("password"), DB_CONFIG.get("dsn")]):
+            logger.error("La configuración de la base de datos (user, password, dsn) está incompleta.")
+            logger.error("Asegúrate de que las variables de entorno DB_USER, DB_PASSWORD y DB_DSN están definidas.")
             return
 
         db = OracleADBConnection(
             user=DB_CONFIG["user"],
             password=DB_CONFIG["password"],
-            host=DB_CONFIG["host"],
-            port=DB_CONFIG["port"],
-            service_name=DB_CONFIG["service_name"]
+            dsn=DB_CONFIG["dsn"]
         )
         logger.info("Objeto de conexión creado.")
 
