@@ -3,3 +3,8 @@ pandas>=2.0.0
 oci>=2.100.0
 python-dotenv>=1.0.0
 ipykernel
+beautifulsoup4
+html2text
+markdownify
+lxml
+chardet
