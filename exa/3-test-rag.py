@@ -30,7 +30,7 @@ def test_rag_pipeline():
         return
 
     # Consulta de prueba
-    query = "¿que es bre-b?"
+    query = "¿que errores comunes se pueden encontrar?"
     logger.info(f"\n{'=' * 60}")
     logger.info(f"CONSULTA: {query}")
     logger.info(f"{'=' * 60}\n")
