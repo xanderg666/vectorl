@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  grok-chat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: grok-chat-app
+    ports:
+      - "8501:8501"
+    environment:
+      - OCI_COMPARTMENT_ID=${OCI_COMPARTMENT_ID}
+      - OCI_ENDPOINT=${OCI_ENDPOINT:-https://inference.generativeai.us-chicago-1.oci.oraclecloud.com}
+      - OCI_CONFIG_FILE=/root/.oci/config
+      - OCI_PROFILE=${OCI_PROFILE:-DEFAULT}
+      - USE_INSTANCE_PRINCIPAL=${USE_INSTANCE_PRINCIPAL:-false}
+    volumes:
+      # Mount OCI config directory (read-only)
+      - ${HOME}/.oci:/root/.oci:ro
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8501/_stcore/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
