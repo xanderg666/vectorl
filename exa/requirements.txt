@@ -10,3 +10,4 @@ lxml
 chardet
 pymupdf
 Pillow
+PyMuPDF

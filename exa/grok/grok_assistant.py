@@ -244,9 +244,13 @@ class GrokOCIAssistant:
             for img_b64 in processed_images:
                 try:
                     # Crear ImageContent
+                    # Ensure base64 string
+                    img_str = img_b64.decode('utf-8') if isinstance(img_b64, bytes) else img_b64
+                    
                     image_content = oci.generative_ai_inference.models.ImageContent(
-                        data=img_b64.encode('utf-8') if isinstance(img_b64, str) else img_b64,
-                        format="jpeg"
+                        image_url=oci.generative_ai_inference.models.ImageUrl(
+                            url=f"data:image/jpeg;base64,{img_str}"
+                        )
                     )
                     content_list.append(image_content)
                 except Exception as e:

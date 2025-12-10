@@ -1,0 +1,136 @@
+{
+    "metadata": {
+        "company": "Life Seguros de Personas y Patrimoniales S.A.",
+        "brand_name": "Life Seguros",
+        "country": "Argentina",
+        "regulator": "Superintendencia de Seguros de la Nación (SSN)",
+        "last_update": "2025-12-10"
+    },
+    "company_profile": {
+        "legal_name": "Life Seguros de Personas y Patrimoniales S.A.",
+        "cuit": "30500051546",
+        "address": "Tte. Gral. Juan Domingo Perón 646, Piso 3, C1038AAN, Ciudad Autónoma de Buenos Aires, Argentina",
+        "websites": [
+            "https://www.lifeseguros.com.ar",
+            "https://www.lifegroupseguros.com.ar"
+        ],
+        "business_segment": "Seguros de personas (seguros de vida, principalmente vida individual y vida colectivo)",
+        "group": "Grupo ST (Life Seguros es una empresa del Grupo ST)",
+        "regulatory_notes": [
+            {
+                "event": "Aprobación de fusión Life Seguros de Personas y Patrimoniales S.A. y Life Group Compañía de Seguros S.A. (antes Prudential Seguros S.A.), siendo Life Seguros de Personas y Patrimoniales S.A. la sociedad absorbente y continuadora.",
+                "resolution": "Resolución SSN 200/2025",
+                "date": "2025-04-01",
+                "sources": ""
+            }
+        ]
+    },
+    "market_position_and_scale": {
+        "overall_life_insurance_business": {
+            "projected_premiums_2025": {
+                "amount_text": "$ 354.000 millones en primas emitidas proyectadas para 2025",
+                "currency": "ARS",
+                "note": "Meta de emisión de primas para el año 2025 declarada por la compañía.",
+                "sources": ""
+            },
+            "premiums_2024": {
+                "amount_text": "$ 234 millones en primas emitidas en 2024 (monto reportado en nota periodística)",
+                "currency": "ARS",
+                "note": "La redacción original menciona \"$ 234 millones\"; la escala exacta debe contrastarse con estados contables oficiales.",
+                "sources": ""
+            },
+            "assets_under_management": {
+                "amount_text": "Casi US$ 700 millones en activos administrados",
+                "currency": "USD",
+                "sources": ""
+            },
+            "market_share_life_insurance": {
+                "value_percent": 12.0,
+                "description": "Participación aproximada del 12% del mercado de seguros de vida en Argentina.",
+                "sources": ""
+            }
+        },
+        "strategic_events": [
+            {
+                "name": "Fusión con Life Insurtech (ex Cardif)",
+                "description": "La fusión con Life Insurtech (antes Cardif) incorporó nuevos partners estratégicos y fortaleció el negocio B2B de Life Seguros.",
+                "sources": ""
+            },
+            {
+                "name": "Incorporación de Prudential (hoy Life Group)",
+                "description": "La incorporación de Prudential Seguros S.A., hoy Life Group Compañía de Seguros S.A., amplió la cuota de mercado de Life Seguros.",
+                "sources": ""
+            }
+        ]
+    },
+    "production_and_ranking": {
+        "vida_colectivo": [
+            {
+                "period": "2024-03",
+                "business_line": "Vida colectivo",
+                "metric": "Producción (primas emitidas en pesos corrientes)",
+                "currency": "ARS",
+                "value_raw": "23154648216",
+                "value_ars": 23154648216,
+                "market_share_percent": 6.03,
+                "rank_in_segment": 5,
+                "segment_total_raw": null,
+                "notes": "Ranking de las 30 compañías que encabezaron vida colectivo a marzo de 2024. Life Seguros aparece con producción de 23.154.648.216 pesos y 6,03% del total.",
+                "sources": ""
+            },
+            {
+                "period": "2024-06",
+                "business_line": "Vida colectivo",
+                "metric": "Producción (primas emitidas en pesos corrientes)",
+                "currency": "ARS",
+                "value_raw": "37528997800",
+                "value_ars": 37528997800,
+                "market_share_percent": 6.44,
+                "rank_in_segment": 5,
+                "segment_total_raw": "582618991355",
+                "segment_total_ars": 582618991355,
+                "notes": "Ranking de las 40 compañías que encabezaron vida colectivo a junio de 2024. Life Seguros figura con 37.528.997.800 pesos de producción (6,44% del total), ubicándose en el 5.º lugar.",
+                "sources": ""
+            },
+            {
+                "period": "2025-03",
+                "business_line": "Vida colectivo",
+                "metric": "Producción (ventas en millones de pesos)",
+                "currency": "ARS",
+                "value_millions_raw": "47101.9",
+                "value_millions_ars": 47101.9,
+                "approx_value_ars": 47101900000,
+                "rank_in_segment": 5,
+                "notes": "Ranking de aseguradoras de vida colectivo a marzo de 2025. Life Seguros registra ventas por 47.101,9 millones de pesos y se ubica quinta, detrás de Sancor Seguros, Provincia Seguros, Caruso Seguros y Caja de Seguros.",
+                "sources": ""
+            }
+        ],
+        "vida_individual": [
+            {
+                "period": "2025-03",
+                "business_line": "Vida individual",
+                "metric": "Producción (ventas en millones de pesos)",
+                "currency": "ARS",
+                "value_millions_raw": "191054.0",
+                "value_millions_ars": 191054.0,
+                "approx_value_ars": 191054000000,
+                "market_share_percent": 41.7,
+                "rank_in_segment": 1,
+                "notes": "Ranking de producción de vida individual a marzo de 2025. Life fue la primera compañía, con ventas por 191.054 millones de pesos y una participación del 41,7% del total del ramo.",
+                "sources": ""
+            }
+        ]
+    },
+    "qualitative_insights": {
+        "management_and_strategy": {
+            "focus": "Fuerte orientación al cliente y a la persistencia de pólizas, con énfasis en innovación y productos de vida con ahorro.",
+            "growth_trend": "El inicio del ejercicio 2024-2025 mostró un incremento interanual real de más de un dígito en el ramo Vida Individual, con perspectivas positivas para el segundo semestre.",
+            "sources": ""
+        },
+        "segment_context": {
+            "definition_seguros_de_personas": "Los seguros de personas en Argentina protegen frente a hechos que afectan la vida, salud o integridad (incluyendo seguros de vida, salud, accidentes personales, sepelio, saldo deudor y retiro).",
+            "tax_benefits": "Las primas de seguros de vida, vida con ahorro y retiro pueden ser deducidas parcialmente del impuesto a las ganancias, lo que incentiva su contratación.",
+            "sources": ""
+        }
+    }
+}
