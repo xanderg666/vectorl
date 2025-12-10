@@ -5,6 +5,10 @@ import logging
 import sys
 import os
 import base64
+import io
+import json
+import fitz
+from PIL import Image
 
 # Add parent directory to path to allow importing config if needed
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -93,11 +97,76 @@ class GrokOCIAssistant:
             "grok-4": {"max_tokens": 20000, "temperature": 1.0, "top_p": 1.0}
         }
 
+    def process_pdf(self, file_path: str) -> List[str]:
+        """
+        Procesa un archivo PDF y convierte sus páginas a imágenes base64.
+        """
+        images_base64 = []
+        try:
+            pdf_document = fitz.open(file_path)
+            for page_num in range(len(pdf_document)):
+                page = pdf_document[page_num]
+                pix = page.get_pixmap(dpi=300, colorspace="rgb")
+                img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+                
+                buffer = io.BytesIO()
+                img.save(buffer, format="JPEG", quality=95, optimize=True)
+                buffer.seek(0)
+                
+                img_str = base64.b64encode(buffer.read()).decode('utf-8')
+                images_base64.append(img_str)
+            
+            pdf_document.close()
+            return images_base64
+        except Exception as e:
+            logger.error(f"Error procesando PDF {file_path}: {e}")
+            return []
+
+    def process_image(self, file_path: str) -> Optional[str]:
+        """
+        Procesa una imagen y la convierte a base64.
+        """
+        try:
+            with Image.open(file_path) as img:
+                if img.mode == 'RGBA':
+                    img = img.convert('RGB')
+                
+                buffer = io.BytesIO()
+                img.save(buffer, format="JPEG", quality=95, optimize=True)
+                buffer.seek(0)
+                
+                return base64.b64encode(buffer.read()).decode('utf-8')
+        except Exception as e:
+            logger.error(f"Error procesando imagen {file_path}: {e}")
+            return None
+
+    def read_text_file(self, file_path: str) -> str:
+        """
+        Lee el contenido de archivos de texto (.txt, .md, .json).
+        """
+        try:
+            ext = os.path.splitext(file_path)[1].lower()
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+                
+            if ext == '.json':
+                try:
+                    # Formatear JSON para mejor legibilidad
+                    json_obj = json.loads(content)
+                    return json.dumps(json_obj, indent=2, ensure_ascii=False)
+                except json.JSONDecodeError:
+                    return content
+            return content
+        except Exception as e:
+            logger.error(f"Error leyendo archivo de texto {file_path}: {e}")
+            return ""
+
     def generate_response(self, prompt: str, model_name: str = "grok-4",
                           system_prompt: Optional[str] = None,
                           max_tokens: Optional[int] = None,
                           temperature: Optional[float] = None,
-                          images: Optional[List[str]] = None) -> str:
+                          images: Optional[List[str]] = None,
+                          files: Optional[List[str]] = None) -> str:
         """
         Generar respuesta usando el modelo Grok
         
@@ -107,19 +176,62 @@ class GrokOCIAssistant:
             system_prompt: Prompt del sistema opcional
             max_tokens: Máximo de tokens
             temperature: Temperatura
-            images: Lista de rutas a archivos de imagen (para modelos multimodales)
+            images: Lista de rutas a archivos de imagen (para modelos multimodales) - DEPRECATED, use files
+            files: Lista de rutas a archivos (imágenes, PDFs, texto, JSON, MD)
         """
         try:
             model_id = self.models.get(model_name, self.models["grok-4"])
             config = self.model_configs.get(model_name, self.model_configs["grok-4"])
 
-            messages = []
+            # Combinar images y files
+            all_files = []
+            if images:
+                all_files.extend(images)
+            if files:
+                all_files.extend(files)
+            
+            # Eliminar duplicados preservando orden
+            all_files = list(dict.fromkeys(all_files))
 
-            if system_prompt:
+            messages = []
+            
+            # Procesar archivos de texto para contexto adicional
+            context_content = ""
+            processed_images = []
+            
+            if all_files:
+                for file_path in all_files:
+                    ext = os.path.splitext(file_path)[1].lower()
+                    
+                    # Archivos visuales
+                    if ext == '.pdf':
+                        pdf_images = self.process_pdf(file_path)
+                        processed_images.extend(pdf_images)
+                    elif ext in ['.jpg', '.jpeg', '.png', '.bmp', '.gif', '.webp']:
+                        img_data = self.process_image(file_path)
+                        if img_data:
+                            processed_images.append(img_data)
+                    
+                    # Archivos de texto
+                    elif ext in ['.txt', '.md', '.json']:
+                        text_content = self.read_text_file(file_path)
+                        if text_content:
+                            filename = os.path.basename(file_path)
+                            context_content += f"\n\n--- CONTENIDO DE {filename} ---\n{text_content}\n"
+                    
+                    else:
+                        logger.warning(f"Formato de archivo no soportado: {file_path}")
+
+            # Construir System Prompt
+            final_system_prompt = system_prompt or ""
+            if context_content:
+                final_system_prompt += f"\n\nTIENES ACCESO A LOS SIGUIENTES ARCHIVOS COMO CONTEXTO:{context_content}"
+
+            if final_system_prompt:
                 system_msg = oci.generative_ai_inference.models.Message()
                 system_msg.role = "SYSTEM"
                 system_msg.content = [
-                    oci.generative_ai_inference.models.TextContent(text=system_prompt)
+                    oci.generative_ai_inference.models.TextContent(text=final_system_prompt)
                 ]
                 messages.append(system_msg)
 
@@ -128,34 +240,17 @@ class GrokOCIAssistant:
             
             content_list = [oci.generative_ai_inference.models.TextContent(text=prompt)]
             
-            # Procesar imágenes si se proporcionan
-            if images:
-                for img_path in images:
-                    try:
-                        with open(img_path, "rb") as image_file:
-                            image_data = base64.b64encode(image_file.read()).decode('utf-8')
-                            
-                            # Determinar formato (simple)
-                            ext = os.path.splitext(img_path)[1].lower().replace('.', '')
-                            if ext == 'jpg': ext = 'jpeg'
-                            
-                            # Asumimos que la SDK tiene ImageContent o similar. 
-                            # Nota: La implementación exacta depende de la versión de OCI SDK.
-                            # Usaremos un enfoque genérico compatible con las últimas versiones.
-                            try:
-                                image_content = oci.generative_ai_inference.models.ImageContent(
-                                    image_url=None, # O data
-                                    data=image_data,
-                                    format=ext
-                                )
-                                content_list.append(image_content)
-                            except AttributeError:
-                                # Fallback si ImageContent no está disponible directamente o tiene otra firma
-                                logger.warning(f"ImageContent no disponible o error al crear. Intentando alternativa.")
-                                # Aquí podrías implementar lógica alternativa si fuera necesario
-                                pass
-                    except Exception as e:
-                        logger.error(f"Error procesando imagen {img_path}: {e}")
+            # Agregar imágenes procesadas al contenido
+            for img_b64 in processed_images:
+                try:
+                    # Crear ImageContent
+                    image_content = oci.generative_ai_inference.models.ImageContent(
+                        data=img_b64.encode('utf-8') if isinstance(img_b64, str) else img_b64,
+                        format="jpeg"
+                    )
+                    content_list.append(image_content)
+                except Exception as e:
+                    logger.error(f"Error al crear objeto ImageContent: {e}")
 
             user_msg.content = content_list
             messages.append(user_msg)

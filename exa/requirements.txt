@@ -8,3 +8,5 @@ html2text
 markdownify
 lxml
 chardet
+pymupdf
+Pillow
